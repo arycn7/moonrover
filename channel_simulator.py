@@ -41,7 +41,7 @@ class ChannelSimulator:
         self._simulate_delay()
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as fwd_sock:
             fwd_sock.sendto(data, dest_addr)
-        print(f"🚀 Forwarded {len(data)}b to {dest_addr}")
+        print(f"🚀 Forwarded {data} to {dest_addr}")
     
     def start(self):
         for name, (listen_port, dest_ip, dest_port) in PORTS.items():
