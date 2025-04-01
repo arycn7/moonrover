@@ -24,6 +24,6 @@ def simulate_network_conditions():
     while True:
         MOON_DELAY = (
             random.uniform(1.0, 3.0),
-            random.uniform(1.0, 3.0)
+            random.uniform(1.0, 3.0))
         PACKET_LOSS_PROB = random.uniform(0.2, 0.4)
         time.sleep(10)
