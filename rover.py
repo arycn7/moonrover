@@ -6,66 +6,58 @@ from protocol import RoverMessage, PORTS
 
 class LunarRover:
     def __init__(self):
-        # Separate sockets for sending/receiving
-        self.telemetry_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        
-        self.seq_num = 0
-        self.running = True
-        self.position = (0, 0)
-        
         self.sensors = {
-            'temp': -50,
+            'temperature': -50,
             'radiation': 120,
             'altitude': 100,
-            'battery': 100,
-            'position': self.position
+            'battery': 100
         }
+        self.seq_nums = {sensor: 0 for sensor in self.sensors}
+        self.running = True
+        self.socks = {
+            sensor: socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            for sensor in self.sensors
+        }
+        self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def _update_sensors(self):
         self.sensors.update({
-            'temp': -50 + random.randint(-5, 5),
+            'temperature': -50 + random.randint(-5, 5),
             'radiation': 120 + random.randint(-10, 10),
-            'battery': max(0, self.sensors['battery'] - 0.1),
-            'position': self.position
+            'battery': max(0, self.sensors['battery'] - 0.1)
         })
 
-    def _generate_telemetry(self):
+    def _send_sensor_data(self, sensor_type):
         while self.running:
-            self.seq_num += 1
-            self._update_sensors()
+            self.seq_nums[sensor_type] += 1
             msg = RoverMessage(
-                msg_type='telemetry',
-                seq_num=self.seq_num,
-                payload=self.sensors
+                msg_type=sensor_type,
+                seq_num=self.seq_nums[sensor_type],
+                payload=self.sensors[sensor_type]
             )
-            try:
-                self.telemetry_sock.sendto(
-                    msg.serialize(),
-                    (PORTS['telemetry'][1], PORTS['telemetry'][2])
-                )
-                print(f"📤 Sent telemetry #{self.seq_num}")
-            except Exception as e:
-                print(f"📤 Telemetry send error: {e}")
-            time.sleep(5)
+            port_config = PORTS[sensor_type]
+            self.socks[sensor_type].sendto(
+                msg.serialize(),
+                (port_config[1], port_config[2])
+            print(f"📤 {sensor_type} sent")
+            time.sleep(1 if sensor_type == 'battery' else 5)
 
     def command_handler(self):
         self.command_sock.bind(('', PORTS['command'][0]))
-        print(f"🎧 Listening for commands on port {PORTS['command'][0]}")
+        print(f"🎧 Command listener on {PORTS['command'][0]}")
         
         while self.running:
             try:
                 data, addr = self.command_sock.recvfrom(1024)
                 msg = RoverMessage.deserialize(data)
-                print(f"📥 Received command: {msg.payload}")
-                # Add command execution logic here
-            except ValueError as e:
-                print(f"⚠️ Command error: {str(e)}")
+                print(f"📥 Command: {msg.payload}")
             except Exception as e:
-                print(f"⚠️ General error: {str(e)}")
+                print(f"⚠️ Command error: {str(e)}")
 
     def start(self):
-        Thread(target=self._generate_telemetry).start()
+        self._update_sensors()
+        for sensor in self.sensors:
+            Thread(target=self._send_sensor_data, args=(sensor,)).start()
         Thread(target=self.command_handler).start()
         print("🤖 Rover operational!")
 
