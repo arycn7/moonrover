@@ -2,8 +2,8 @@ import json
 from dataclasses import dataclass
 
 # SET THESE TO ACTUAL LAPTOP IPs FROM HOTSPOT CONNECTION
-EARTH_IP = "192.168.X.Y"  # Earth station laptop IP
-ROVER_IP = "192.168.A.B"   # Rover laptop IP
+EARTH_IP = "10.179.66.119"  # Earth station laptop IP
+ROVER_IP = "10.179.66.156"   # Rover laptop IP
 
 # Communication Ports (bi-directional channels)
 PORTS = {
