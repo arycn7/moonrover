@@ -39,16 +39,17 @@ class LunarRover:
                 seq_num=self.seq_num,
                 payload=self.sensors
             )
-            # Send to Earth's IP:PORT from protocol.py
-            self.telemetry_sock.sendto(
-                msg.serialize(),
-                (PORTS['telemetry'][1], PORTS['telemetry'][2])
-            )
-            print(f"📤 Sent telemetry #{self.seq_num}")
+            try:
+                self.telemetry_sock.sendto(
+                    msg.serialize(),
+                    (PORTS['telemetry'][1], PORTS['telemetry'][2])
+                )
+                print(f"📤 Sent telemetry #{self.seq_num}")
+            except Exception as e:
+                print(f"📤 Telemetry send error: {e}")
             time.sleep(5)
 
     def command_handler(self):
-        # Bind to ALL interfaces on command port
         self.command_sock.bind(('', PORTS['command'][0]))
         print(f"🎧 Listening for commands on port {PORTS['command'][0]}")
         
@@ -57,9 +58,11 @@ class LunarRover:
                 data, addr = self.command_sock.recvfrom(1024)
                 msg = RoverMessage.deserialize(data)
                 print(f"📥 Received command: {msg.payload}")
-                # Execute command logic here
-            except Exception as e:
+                # Add command execution logic here
+            except ValueError as e:
                 print(f"⚠️ Command error: {str(e)}")
+            except Exception as e:
+                print(f"⚠️ General error: {str(e)}")
 
     def start(self):
         Thread(target=self._generate_telemetry).start()
