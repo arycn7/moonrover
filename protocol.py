@@ -14,7 +14,7 @@ PORTS = {
 }
 
 MOON_DELAY = (1.28, 2.56)  # Light delay in seconds
-PACKET_LOSS_PROB = 0.3       # 30% packet loss
+PACKET_LOSS_PROB = 0.05       # 5% packet loss
 MAX_BANDWIDTH = 1024        # 1KB/s per channel
 
 @dataclass
