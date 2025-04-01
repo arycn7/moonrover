@@ -1,13 +1,15 @@
 import socket
 import time
 import random
-import json
 from threading import Thread
-from protocol import RoverMessage, PORTS, ROVER_IP
+from protocol import RoverMessage, PORTS
 
 class LunarRover:
     def __init__(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # Separate sockets for sending/receiving
+        self.telemetry_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        
         self.seq_num = 0
         self.running = True
         self.position = (0, 0)
@@ -19,12 +21,13 @@ class LunarRover:
             'battery': 100,
             'position': self.position
         }
-        
+
     def _update_sensors(self):
         self.sensors.update({
             'temp': -50 + random.randint(-5, 5),
             'radiation': 120 + random.randint(-10, 10),
-            'battery': max(0, self.sensors['battery'] - 0.1)
+            'battery': max(0, self.sensors['battery'] - 0.1),
+            'position': self.position
         })
 
     def _generate_telemetry(self):
@@ -36,45 +39,32 @@ class LunarRover:
                 seq_num=self.seq_num,
                 payload=self.sensors
             )
-            self._send_message(msg, PORTS['telemetry'][1:])
+            # Send to Earth's IP:PORT from protocol.py
+            self.telemetry_sock.sendto(
+                msg.serialize(),
+                (PORTS['telemetry'][1], PORTS['telemetry'][2])
+            )
+            print(f"📤 Sent telemetry #{self.seq_num}")
             time.sleep(5)
-            
-    def _send_message(self, msg, dest):
-        self.sock.sendto(msg.serialize(), dest)
-            
+
     def command_handler(self):
-        self.sock.bind((ROVER_IP, PORTS['command'][0]))
+        # Bind to ALL interfaces on command port
+        self.command_sock.bind(('', PORTS['command'][0]))
+        print(f"🎧 Listening for commands on port {PORTS['command'][0]}")
         
         while self.running:
             try:
-                data, addr = self.sock.recvfrom(1024)
+                data, addr = self.command_sock.recvfrom(1024)
                 msg = RoverMessage.deserialize(data)
-                
-                if msg.msg_type == 'command':
-                    response = self._execute_command(msg.payload)
-                    self._send_ack(msg.seq_num)
-            except ValueError as e:
-                print(f"Invalid command: {e}")
-
-    def _execute_command(self, command):
-        action = command.get('action')
-        if action == 'move':
-            distance = command.get('distance', 0)
-            direction = command.get('direction', 'north')
-            # Simplified movement logic
-            x, y = self.position
-            if direction == 'north': y += distance
-            elif direction == 'south': y -= distance
-            elif direction == 'east': x += distance
-            elif direction == 'west': x -= distance
-            self.position = (x, y)
-            return {'status': 'OK', 'new_position': self.position}
-        return {'status': 'ERROR', 'reason': 'Unknown command'}
+                print(f"📥 Received command: {msg.payload}")
+                # Execute command logic here
+            except Exception as e:
+                print(f"⚠️ Command error: {str(e)}")
 
     def start(self):
         Thread(target=self._generate_telemetry).start()
         Thread(target=self.command_handler).start()
-        print("🤖 Rover operational")
+        print("🤖 Rover operational!")
 
 if __name__ == "__main__":
     LunarRover().start()
