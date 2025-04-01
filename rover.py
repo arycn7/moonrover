@@ -1,5 +1,6 @@
 import socket
 import time
+import random
 import json
 from threading import Thread
 from protocol import RoverMessage, PORTS, ROVER_IP
