@@ -44,7 +44,7 @@ class LunarRover:
             'temperature': 5,   # Every 5 seconds
             'radiation': 5,     
             'altitude': 5,
-            'battery': 10       # Every 10 seconds
+            'battery': 5       # Every 5 seconds
             }
             time.sleep(intervals[sensor_type])  # ⚠️ Slow down transmissions
 
