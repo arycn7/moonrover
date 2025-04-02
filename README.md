@@ -12,4 +12,4 @@ PS C:\Users\rossa\moonrover> python rover.py
 📤 Sent telemetry #7
 📤 Sent telemetry #8
 📤 Sent telemetry #9
-📤 Sent telemetry #10
+📤 Sent telemetry #1
