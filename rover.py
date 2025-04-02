@@ -29,6 +29,14 @@ class LunarRover:
 
     def _send_sensor_data(self, sensor_type):
         while self.running:
+            print(f"📤 {sensor_type} sent")
+            intervals = {
+            'temperature': 5,   # Every 5 seconds
+            'radiation': 5,     
+            'altitude': 5,
+            'battery': 5       # Every 5 seconds
+            }
+            time.sleep(intervals[sensor_type])
             self.seq_nums[sensor_type] += 1
             msg = RoverMessage(
                 msg_type=sensor_type,
@@ -39,14 +47,7 @@ class LunarRover:
             self.socks[sensor_type].sendto(
                 msg.serialize(),
                 (port_config[1], port_config[2]))
-            print(f"📤 {sensor_type} sent")
-            intervals = {
-            'temperature': 5,   # Every 5 seconds
-            'radiation': 5,     
-            'altitude': 5,
-            'battery': 5       # Every 5 seconds
-            }
-            time.sleep(intervals[sensor_type])  # ⚠️ Slow down transmissions
+              
 
     def command_handler(self):
         self.command_sock.bind(('', PORTS['command'][0]))
