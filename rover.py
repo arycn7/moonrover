@@ -38,7 +38,7 @@ class LunarRover:
             port_config = PORTS[sensor_type]
             self.socks[sensor_type].sendto(
                 msg.serialize(),
-                (port_config[1], port_config[2])
+                (port_config[1], port_config[2]))
             print(f"📤 {sensor_type} sent")
             intervals = {
             'temperature': 5,   # Every 5 seconds
