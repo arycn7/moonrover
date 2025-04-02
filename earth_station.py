@@ -34,6 +34,7 @@ class EarthStation:
             msg.serialize(),
             (PORTS['command'][1], PORTS['command'][2]))
         print(f"📡 Sent command: {command}")
+        time.sleep(random.uniform(1.28, 2.56)) 
 
     def start(self):
         for sensor in self.socks:
