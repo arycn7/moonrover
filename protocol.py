@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-
+import random
 # IP Configuration
 EARTH_IP = "10.179.66.119"  # Earth station laptop IP
 ROVER_IP = "10.179.66.156"   # Rover laptop IP
