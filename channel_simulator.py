@@ -38,7 +38,8 @@ class ChannelSimulator:
             sock.close()
     
     def _delayed_forward(self, data, dest_addr):
-        self._simulate_delay()
+        delay = random.uniform(1.28, 2.56)  # Random delay in seconds
+        time.sleep(delay)
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as fwd_sock:
             fwd_sock.sendto(data, dest_addr)
         print(f"🚀 Forwarded {data} to {dest_addr}")
