@@ -40,7 +40,13 @@ class LunarRover:
                 msg.serialize(),
                 (port_config[1], port_config[2])
             print(f"📤 {sensor_type} sent")
-            time.sleep(1 if sensor_type == 'battery' else 5)
+            intervals = {
+            'temperature': 5,   # Every 5 seconds
+            'radiation': 5,     
+            'altitude': 5,
+            'battery': 10       # Every 10 seconds
+            }
+            time.sleep(intervals[sensor_type])  # ⚠️ Slow down transmissions
 
     def command_handler(self):
         self.command_sock.bind(('', PORTS['command'][0]))
