@@ -1,7 +1,7 @@
 import socket
 from threading import Thread
 from protocol import PORTS, RoverMessage
-
+import random
 class EarthStation:
     def __init__(self):
         self.socks = {
